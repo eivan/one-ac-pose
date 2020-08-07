@@ -1,3 +1,6 @@
 [submodule "third_party/MegaDepth"]
 	path = third_party/MegaDepth
 	url = https://github.com/eivan/MegaDepth.git
+[submodule "third_party/graph-cut-ransac"]
+	path = third_party/graph-cut-ransac
+	url = https://github.com/danini/graph-cut-ransac.git

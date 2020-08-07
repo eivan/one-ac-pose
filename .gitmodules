@@ -4,3 +4,6 @@
 [submodule "third_party/graph-cut-ransac"]
 	path = third_party/graph-cut-ransac
 	url = https://github.com/danini/graph-cut-ransac.git
+[submodule "third_party/VlFeatExtraction"]
+	path = third_party/VlFeatExtraction
+	url = https://github.com/eivan/VlFeatExtraction.git

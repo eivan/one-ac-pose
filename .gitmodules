@@ -7,3 +7,6 @@
 [submodule "third_party/VlFeatExtraction"]
 	path = third_party/VlFeatExtraction
 	url = https://github.com/eivan/VlFeatExtraction.git
+[submodule "third_party/cnpy"]
+	path = third_party/cnpy
+	url = https://github.com/rogersce/cnpy.git

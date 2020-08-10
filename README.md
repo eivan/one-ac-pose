@@ -28,7 +28,6 @@ For lauching the full pipeline of
  - extract affine features using [VlFeat](https://github.com/eivan/VlFeatExtraction)
  - perform two-view matching of extracted features
  - real-world two-view pose estimation,
-then use python3 to launch
 ```shell
 $ python3 scripts/estimate_pose.py path/to/image1 path/to/image2
 ```

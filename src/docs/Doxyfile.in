@@ -1,0 +1,20 @@
+PROJECT_NAME           = OneACPose - Relative Pose from Deep Learned Depth and a Single Affine Correspondence
+PROJECT_BRIEF          = "Created by Ivan Eichhardt"
+
+OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/doc_doxygen/
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/ @CMAKE_CURRENT_SOURCE_DIR@ @CMAKE_CURRENT_SOURCE_DIR@/docs @CMAKE_CURRENT_SOURCE_DIR@/OneACPose
+
+OUTPUT_LANGUAGE        = English
+
+MULTILINE_CPP_IS_BRIEF = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+SHOW_DIRECTORIES       = YES
+SOURCE_BROWSER         = YES
+HTML_DYNAMIC_SECTIONS  = YES
+USE_MATHJAX            = YES		# https://www.stack.nl/~dimitri/doxygen/manual/formulas.html
+PAPER_TYPE             = letter
+HIDE_UNDOC_RELATIONS   = NO
+#HAVE_DOT               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES

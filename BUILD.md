@@ -57,7 +57,7 @@ $ cd build_dir
 
 2. Configure CMAKE (see the choice of [CMAKE options](#cmakevariables)).
 ```shell
-$ cmake-gui ../src
+$ cmake-gui ..
 ```
 
 3. Compile.

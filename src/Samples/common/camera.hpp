@@ -35,4 +35,6 @@ namespace common {
     void LoadParams(const std::string_view filename);
   };
 
+  using CameraPtr = std::shared_ptr<common::Camera>;
+
 }

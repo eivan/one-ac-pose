@@ -3,18 +3,12 @@
 
 #include <OneACPose/solver_one_ac_depth.hpp>
 
-#include <common/camera_radial.hpp>
 #include <common/numeric.hpp>
+#include <common/camera_radial.hpp>
 #include <common/local_affine_frame.hpp>
+#include <common/pose_estimation.hpp>
 
 using namespace OneACPose;
-
-void estimatePose_1ACD(
-  const common::CameraPtr& cam0,
-  const common::CameraPtr& cam1,
-  const common::Feature_LAF_D& laf0,
-  const common::Feature_LAF_D& laf1,
-  double& scale, OneACPose::Mat3& R, OneACPose::Vec3& t);
 
 void compute_synthetic_LAF(
   const Mat34& P, const common::CameraPtr& cam,
@@ -29,16 +23,15 @@ int main()
   // initialize two poses
   // ==========================================================================
   const Vec3 target{ Vec3::Random() };
-  //const Vec3 target{ Vec3::Zero() };
   const double distance_from_target = 5;
 
   // init pose 0
-  const Vec3 C0{ Vec3::UnitX() * distance_from_target };
+  const Vec3 C0{ Vec3::Random().normalized() * distance_from_target };
   const Mat3 R0{ common::LookAt(target - C0) };
   const Mat34 P0{ (Mat34() << R0, -R0 * C0).finished() };
 
   // init pose 1
-  const Vec3 C1{ Vec3::UnitZ() * distance_from_target };
+  const Vec3 C1{ Vec3::Random().normalized() * distance_from_target };
   const Mat3 R1{ common::LookAt(target - C1) };
   const Mat34 P1{ (Mat34() << R1, -R1 * C1).finished() };
 
@@ -54,6 +47,7 @@ int main()
   // ==========================================================================
   // initialize 3D structure
   // ==========================================================================
+  
   // surface point
   const Vec3 X{ Vec3::Random() };
   // surface normal at X
@@ -113,28 +107,4 @@ void compute_synthetic_LAF(
   std::tie(laf.lambda, dlambda_dY.noalias()) = cam->depth_gradient(Y);
   // aka dlambda_dx
   laf.dlambda_dx.noalias() = dlambda_dY * dY_dx;
-}
-
-void estimatePose_1ACD(
-  const common::CameraPtr& cam0,
-  const common::CameraPtr& cam1,
-  const common::Feature_LAF_D& laf0,
-  const common::Feature_LAF_D& laf1,
-  double& scale, OneACPose::Mat3& R, OneACPose::Vec3& t)
-{
-  // Project 2D LAF 0 into 3D using depth and depth derivatives
-  Vec3 src;
-  Mat32 src_diff;
-  laf0.as_3D(cam0, src, src_diff);
-
-  // Project 2D LAF 1 into 3D using depth and depth derivatives
-  Vec3 dst;
-  Mat32 dst_diff;
-  laf1.as_3D(cam1, dst, dst_diff);
-
-  // estimate pose using 1AC+D
-  OneACPose::OneACD(
-    dst, src,
-    dst_diff, src_diff,
-    scale, R, t);
 }

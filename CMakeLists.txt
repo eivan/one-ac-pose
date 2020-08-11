@@ -12,7 +12,7 @@ option(ONEACPOSE_BUILD_SAMPLES "Build samples" ON)
 option(ONEACPOSE_BUILD_DOC "Build documentation" OFF)
 option(ONEACPOSE_USE_OPENMP "Use OpenMP for parallelization" OFF)
 
-include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/src/)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)

@@ -9,9 +9,11 @@ target_link_libraries(Real_TwoView
   ${OpenCV_LIBS}
   VlFeatExtraction
   cnpy
+  common
 )
 add_dependencies(Real_TwoView 
   VlFeatExtraction
   OneACPose
   cnpy
+  common
 )

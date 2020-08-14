@@ -11,6 +11,17 @@ add_library(common
 )
 
 target_link_libraries(common
-  PRIVATE
-    Eigen3::Eigen
+  Eigen3::Eigen
+  GraphCutRANSAC
+  ${OpenCV_LIBS}
+  VlFeatExtraction
+  cnpy
+)
+
+add_dependencies(common 
+  OneACPose
+  GraphCutRANSAC
+  VlFeatExtraction
+  cnpy
+  common
 )

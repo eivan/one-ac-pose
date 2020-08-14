@@ -5,11 +5,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(common)
 add_subdirectory(Synthetic_TwoView)
-#add_subdirectory(Real_TwoView)
+add_subdirectory(Real_TwoView)
 
 
 set_property(TARGET 
     common
     Synthetic_TwoView
-    #Real_TwoView
+    Real_TwoView
   PROPERTY FOLDER "Samples")

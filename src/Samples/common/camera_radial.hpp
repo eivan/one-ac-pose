@@ -161,7 +161,8 @@ namespace common {
   template<typename T>
   inline Eigen::Matrix<T, 3, 1> Camera_Radial::q_radial(const Eigen::Matrix<T, 2, 1>& x) const {
     auto p2 = remove_disto_cam(q_pinhole(x));
-    return Eigen::Matrix<T, 3, 1>(p2(0), p2(1), T(1.0)).normalized();
+    //return Eigen::Matrix<T, 3, 1>(p2(0), p2(1), T(1.0)).normalized();
+    return p2.homogeneous();
   }
 
   template<typename T>
@@ -169,7 +170,8 @@ namespace common {
   {
     // NOTE: needs to be X = depth * q_radial
     // and as there's .normalized() in q_radial, here the norm should be returned
-    return X.norm();
+    //return X.norm();
+    return X(2);
   }
 
 }

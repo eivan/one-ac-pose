@@ -14,9 +14,17 @@ add_subdirectory(VlFeatExtraction)
 # Add libraries explicitly
 # ==============================================================================
 
+find_package(ZLIB REQUIRED)
+
+include_directories(${ZLIB_INCLUDE_DIRS})
+
 add_library(cnpy
   cnpy/cnpy.cpp
   cnpy/cnpy.h
+)
+
+target_link_libraries(cnpy 
+  ${ZLIB_LIBRARIES}
 )
 
 # ==============================================================================

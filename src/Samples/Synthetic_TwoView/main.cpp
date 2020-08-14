@@ -1,8 +1,6 @@
 #include <iostream>
 #include <time.h>
 
-#include <OneACPose/solver_one_ac_depth.hpp>
-
 #include <common/numeric.hpp>
 #include <common/camera_radial.hpp>
 #include <common/local_affine_frame.hpp>

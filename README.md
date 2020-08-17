@@ -18,7 +18,7 @@ Cite it as
 Build using CMAKE
 -----------------
 
-See [BUILD](BUILD.md) for dependencies and instructions.
+See [BUILD](BUILD.md) for dependencies and instructions to build our C++ library and sample projects.
 
 Python bindings
 ---------------

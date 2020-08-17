@@ -7,11 +7,14 @@ include_directories (BEFORE "${CMAKE_SOURCE_DIR}/third_party/VlFeatExtraction/sr
 include_directories (BEFORE "${CMAKE_SOURCE_DIR}/third_party/VlFeatExtraction/third_party/")
 
 add_subdirectory(common)
+
 add_subdirectory(Synthetic_TwoView)
 add_subdirectory(Real_TwoView)
+add_subdirectory(pyoneacpose)
 
 set_property(TARGET 
     common
     Synthetic_TwoView
     Real_TwoView
+    pyoneacpose
   PROPERTY FOLDER "Samples")

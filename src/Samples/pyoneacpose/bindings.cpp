@@ -5,6 +5,7 @@
 
 #include <common/pose_estimation.hpp>
 #include <common/features.hpp>
+#include <opencv2/core.hpp>
 
 namespace py = pybind11;
 
@@ -236,6 +237,77 @@ py::tuple match_LAFs(
   return py::make_tuple(matches_, scores_);
 }
 
+double sample_bilinear(const float* img, size_t rows, size_t cols, float x, float y)
+{
+  assert(!img.empty());
+  assert(img.channels() == 3);
+
+  const int x_i = (int)x;
+  const int y_i = (int)y;
+
+  const int x0 = cv::borderInterpolate(x_i, cols, cv::BORDER_REFLECT_101);
+  const int x1 = cv::borderInterpolate(x_i + 1, cols, cv::BORDER_REFLECT_101);
+  const int y0 = cv::borderInterpolate(y_i, rows, cv::BORDER_REFLECT_101);
+  const int y1 = cv::borderInterpolate(y_i + 1, rows, cv::BORDER_REFLECT_101);
+
+  const float a = x - (float)x_i;
+  const float c = y - (float)y_i;
+
+  return (img[y0 * cols + x0] * (1.f - a) + img[y0 * cols + x1] * a) * (1.f - c)
+    + (img[y1 * cols + x0] * (1.f - a) + img[y1 * cols + x1] * a) * c;
+}
+
+py::array_t<double> augment_LAFs_with_depth(
+  py::array_t<float> keypoints,
+  py::array_t<float> depth_image
+) {
+  // TODO: size checks
+
+  auto buf_keypoints = keypoints.request();
+  auto ptr_keypoints = static_cast<VlFeatExtraction::FeatureKeypoint*>(buf_keypoints.ptr);
+
+  auto buf_depth_image = depth_image.request();
+  auto ptr_depth_image = static_cast<float*>(buf_depth_image.ptr);
+  const size_t rows = buf_depth_image.shape[0];
+  const size_t cols = buf_depth_image.shape[1];
+
+  py::array_t<double> LAFS_with_depth = py::array_t<double>({ buf_keypoints.shape[0], 9 });
+  auto buf_LAFS_with_depth = LAFS_with_depth.request();
+  auto ptr_LAFS_with_depth = static_cast<double*>(buf_LAFS_with_depth.ptr);
+
+  const auto num_keypoints = buf_keypoints.shape[0];
+
+  for (size_t i = 0; i < num_keypoints; ++i) {
+    double lambda;
+    OneACPose::RowVec2 dlambda_dx;
+
+    const float step_size = 0.9;
+
+    // Left image and depth
+    const auto& f_l = ptr_keypoints[i];
+    lambda =
+      sample_bilinear(ptr_depth_image, rows, cols, f_l.x, f_l.y);
+    dlambda_dx[0] =
+      sample_bilinear(ptr_depth_image, rows, cols, f_l.x + f_l.a11 * step_size, f_l.y + f_l.a21 * step_size) -
+      sample_bilinear(ptr_depth_image, rows, cols, f_l.x - f_l.a11 * step_size, f_l.y - f_l.a21 * step_size);
+    dlambda_dx[1] =
+      sample_bilinear(ptr_depth_image, rows, cols, f_l.x + f_l.a12 * step_size, f_l.y + f_l.a22 * step_size) -
+      sample_bilinear(ptr_depth_image, rows, cols, f_l.x - f_l.a12 * step_size, f_l.y - f_l.a22 * step_size);
+
+    ptr_LAFS_with_depth[9 * i + 0] = f_l.x;
+    ptr_LAFS_with_depth[9 * i + 0] = f_l.y;
+    ptr_LAFS_with_depth[9 * i + 0] = f_l.a11;
+    ptr_LAFS_with_depth[9 * i + 0] = f_l.a12;
+    ptr_LAFS_with_depth[9 * i + 0] = f_l.a21;
+    ptr_LAFS_with_depth[9 * i + 0] = f_l.a22;
+    ptr_LAFS_with_depth[9 * i + 0] = lambda;
+    ptr_LAFS_with_depth[9 * i + 0] = dlambda_dx[0];
+    ptr_LAFS_with_depth[9 * i + 0] = dlambda_dx[1];
+  }
+
+  return LAFS_with_depth;
+}
+
 PYBIND11_PLUGIN(pyoneacpose) {
 
   py::module m("pygcransac", R"doc(
@@ -246,6 +318,9 @@ PYBIND11_PLUGIN(pyoneacpose) {
            :toctree: _generate
            
            estimatePose_1ACD_GCRANSAC,
+           extract_LAFs,
+           match_LAFs,
+           augment_LAFs_with_depth,
 
     )doc");
 
@@ -279,6 +354,11 @@ PYBIND11_PLUGIN(pyoneacpose) {
     py::arg("descriptors_left"),
     py::arg("descriptors_right"),
     py::arg("sort_matches_by_score") = true
+  );
+
+  m.def("augment_LAFs_with_depth", &augment_LAFs_with_depth, R"doc(some doc)doc",
+    py::arg("keypoints"),
+    py::arg("depth_image")
   );
 
   return m.ptr();

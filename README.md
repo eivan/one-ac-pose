@@ -16,9 +16,19 @@ Cite it as
 ```
 
 Build using CMAKE
---------
+-----------------
 
 See [BUILD](BUILD.md) for dependencies and instructions.
+
+Python bindings
+---------------
+
+To install Python bindings (package called "pyoneacpose") use the following commands:
+
+```shell
+$ git clone --recursive https://github.com/eivan/one-ac-pose.git
+$ pip install ./one-ac-pose
+```
 
 Usage
 -----

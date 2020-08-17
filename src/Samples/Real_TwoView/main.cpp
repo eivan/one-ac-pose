@@ -33,6 +33,13 @@ int main(int argc, char** argv)
   const size_t cell_number_in_neighborhood_graph_ = 8; // The number of cells along each axis in the neighborhood graph.
   const int fps_ = -1; // The required FPS limit. If it is set to -1, the algorithm will not be interrupted before finishing.
 
+  // Feature extraction and matching options
+  VlFeatExtraction::SiftExtractionOptions options_f;
+  VlFeatExtraction::SiftMatchingOptions options_m;
+
+  options_f.estimate_affine_shape = true;
+  options_f.domain_size_pooling = false;
+
   // ==========================================================================
   // extract LAFs + Depth and match the features
   // ==========================================================================
@@ -43,10 +50,12 @@ int main(int argc, char** argv)
   std::vector<size_t> im_right_shape;
 
   bool success_features = extract_and_match_LAFs(
+    options_f, options_m,
     im_left, im_right,
     depth_left, depth_right,
     LAFs_left, LAFs_right,
-    &im_left_shape, &im_right_shape);
+    &im_left_shape, &im_right_shape,
+    false);
 
   if (!success_features) {
     std::cerr << "Failed feature extraction and/or matching." << std::endl;

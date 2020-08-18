@@ -1,8 +1,10 @@
 # OneACPose - Relative Pose from Deep Learned Depth and a Single Affine Correspondence
 
 Code for our ECCV 2020 paper:
-[Relative Pose from Deep Learned Depth and a Single Affine Correspondence](https://arxiv.org/abs/2007.10082)
+[Relative Pose from Deep Learned Depth and a Single Affine Correspondence](http://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123570613.pdf)
 Ivan Eichhardt, Daniel Barath; The European Conference on Computer Vision (ECCV), 2020
+
+Access the [paper](http://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123570613.pdf) and [supplementary material](http://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123570613-supp.pdf) at ecva.net.
 
 Cite it as
 ```
@@ -11,7 +13,8 @@ Cite it as
 	title = {Relative Pose from Deep Learned Depth and a Single Affine Correspondence},
 	booktitle = {The European Conference on Computer Vision (ECCV)},
 	month = {August},
-	year = {2020}
+	year = {2020},
+	doi = {10.1007/978-3-030-58610-2_37}
 }
 ```
 

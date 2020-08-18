@@ -14,8 +14,8 @@ py::tuple estimatePose_1ACD_GCRANSAC(
   py::array_t<double>  LAFs_right,
   py::array_t<double>  intrinsics_src,
   py::array_t<double>  intrinsics_dst,
-  py::array_t<double>  im_left_shape,
-  py::array_t<double>  im_right_shape,
+  py::array_t<size_t>  im_left_shape,
+  py::array_t<size_t>  im_right_shape,
   size_t cell_number_in_neighborhood_graph,
   int fps,
   double spatial_coherence_weight,
@@ -30,10 +30,10 @@ py::tuple estimatePose_1ACD_GCRANSAC(
   const size_t num_features_left = buf_LAFs_left.shape[0];
   const size_t num_features_right = buf_LAFs_right.shape[0];
   const size_t num_matches = num_features_left;
-  if (num_features_left == num_features_right) {
+  if (num_features_left != num_features_right) {
     throw std::invalid_argument("LAFs_left does not have the same number of rows as LAFs_right");
   }
-  if (num_features_left >= 7) {
+  if (num_features_left < 7) {
     throw std::invalid_argument("LAFs_left and LAFs_right should have at least 7 rows");
   }
   if (buf_LAFs_left.shape[1] != 9 || buf_LAFs_right.shape[1] != 9) {
@@ -52,10 +52,10 @@ py::tuple estimatePose_1ACD_GCRANSAC(
   // ==========================================================================
   py::buffer_info buf_intrinsics_src = intrinsics_src.request();
   py::buffer_info buf_intrinsics_dst = intrinsics_dst.request();
-  if (buf_intrinsics_src.shape[0] == 3 && buf_intrinsics_src.shape[1] == 3) {
+  if (buf_intrinsics_src.shape[0] != 3 && buf_intrinsics_src.shape[1] != 3) {
     throw std::invalid_argument("intrinsics_src should be a 3-by-3 array");
   }
-  if (buf_intrinsics_dst.shape[0] == 3 && buf_intrinsics_dst.shape[1] == 3) {
+  if (buf_intrinsics_dst.shape[0] != 3 && buf_intrinsics_dst.shape[1] != 3) {
     throw std::invalid_argument("intrinsics_dst should be a 3-by-3 array");
   }
 
@@ -64,10 +64,10 @@ py::tuple estimatePose_1ACD_GCRANSAC(
   // ==========================================================================
   py::buffer_info buf_im_left_shape = im_left_shape.request();
   py::buffer_info buf_im_right_shape = im_right_shape.request();
-  if (buf_im_left_shape.shape[0] != 2 && buf_im_left_shape.shape[2] != 1) {
+  if (buf_im_left_shape.shape[0] != 2 && buf_im_left_shape.shape[1] != 1) {
     throw std::invalid_argument("im_left_shape should be a 2-by-1 array");
   }
-  if (buf_im_right_shape.shape[0] != 2 && buf_im_right_shape.shape[2] != 1) {
+  if (buf_im_right_shape.shape[0] != 2 && buf_im_right_shape.shape[1] != 1) {
     throw std::invalid_argument("im_right_shape should be a 2-by-1 array");
   }
   // (params)
@@ -115,14 +115,16 @@ py::tuple estimatePose_1ACD_GCRANSAC(
     for (size_t i = 0; i < num_matches; i++) {
       ptr_buf_inliers_[i] = false;
     }
-    for (size_t i = 0; i < inliers.size(); i++) {
-      ptr_buf_inliers_[inliers[i]] = true;
+    for (const auto& inlier : inliers) {
+      ptr_buf_inliers_[inlier] = true;
     }
 
     // essential matrix
     py::array_t<double> essential_matrix_ = py::array_t<double>({ 3,3 });
     py::buffer_info buf_essential_matrix_ = essential_matrix_.request();
     auto ptr_essential_matrix_ = static_cast<double*>(buf_essential_matrix_.ptr);
+    
+    essential_matrix.transposeInPlace(); // rows -> columns
     for (size_t i = 0; i < 9; i++) {
       ptr_essential_matrix_[i] = essential_matrix.data()[i];
     }
@@ -138,7 +140,7 @@ py::tuple extract_LAFs(
   int first_octave = -1,
   int num_octaves = 4,
   int octave_resolution = 3,
-  bool domain_size_pooling = true
+  bool domain_size_pooling = false
 ) {
   // TODO: size checks
 
@@ -175,7 +177,7 @@ py::tuple extract_LAFs(
 
     // descriptors
     py::array_t<uint8_t> descriptors_ = py::array_t<uint8_t>({ (size_t)descriptors.rows(), (size_t)descriptors.cols() });
-    auto buf_descriptors_ = keypoints_.request();
+    auto buf_descriptors_ = descriptors_.request();
     auto ptr_descriptors_src = descriptors.data();
     auto ptr_descriptors_dst = static_cast<uint8_t*>(buf_descriptors_.ptr);
     std::copy(ptr_descriptors_src, ptr_descriptors_src + descriptors.rows() * descriptors.cols(), ptr_descriptors_dst);
@@ -225,7 +227,7 @@ py::tuple match_LAFs(
 
   // second component of tuple: py::array_t<float> of scores
   py::array_t<float> scores_ = py::array_t<float>(num_matches);
-  auto buf_scores_ = matches_.request();
+  auto buf_scores_ = scores_.request();
   auto ptr_scores_ = static_cast<int*>(buf_scores_.ptr);
 
   for (size_t i = 0; i < num_matches; ++i) {
@@ -253,8 +255,12 @@ double sample_bilinear(const float* img, size_t rows, size_t cols, float x, floa
   const float a = x - (float)x_i;
   const float c = y - (float)y_i;
 
-  return (img[y0 * cols + x0] * (1.f - a) + img[y0 * cols + x1] * a) * (1.f - c)
-    + (img[y1 * cols + x0] * (1.f - a) + img[y1 * cols + x1] * a) * c;
+  auto at = [&img, &cols](int y, int x) {
+    return img[y * cols + x];
+  };
+
+  return (at(y0,x0) * (1.f - a) + at(y0,x1) * a) * (1.f - c)
+    + (at(y1,x0) * (1.f - a) + at(y1,x1) * a) * c;
 }
 
 py::array_t<double> augment_LAFs_with_depth(
@@ -265,17 +271,16 @@ py::array_t<double> augment_LAFs_with_depth(
 
   auto buf_keypoints = keypoints.request();
   auto ptr_keypoints = static_cast<VlFeatExtraction::FeatureKeypoint*>(buf_keypoints.ptr);
+  const auto num_keypoints = buf_keypoints.shape[0];
 
   auto buf_depth_image = depth_image.request();
   auto ptr_depth_image = static_cast<float*>(buf_depth_image.ptr);
   const size_t rows = buf_depth_image.shape[0];
   const size_t cols = buf_depth_image.shape[1];
 
-  py::array_t<double> LAFS_with_depth = py::array_t<double>({ buf_keypoints.shape[0], 9 });
+  py::array_t<double> LAFS_with_depth = py::array_t<double>({ num_keypoints, 9 });
   auto buf_LAFS_with_depth = LAFS_with_depth.request();
   auto ptr_LAFS_with_depth = static_cast<double*>(buf_LAFS_with_depth.ptr);
-
-  const auto num_keypoints = buf_keypoints.shape[0];
 
   for (size_t i = 0; i < num_keypoints; ++i) {
     double lambda;
@@ -295,14 +300,14 @@ py::array_t<double> augment_LAFs_with_depth(
       sample_bilinear(ptr_depth_image, rows, cols, f_l.x - f_l.a12 * step_size, f_l.y - f_l.a22 * step_size);
 
     ptr_LAFS_with_depth[9 * i + 0] = f_l.x;
-    ptr_LAFS_with_depth[9 * i + 0] = f_l.y;
-    ptr_LAFS_with_depth[9 * i + 0] = f_l.a11;
-    ptr_LAFS_with_depth[9 * i + 0] = f_l.a12;
-    ptr_LAFS_with_depth[9 * i + 0] = f_l.a21;
-    ptr_LAFS_with_depth[9 * i + 0] = f_l.a22;
-    ptr_LAFS_with_depth[9 * i + 0] = lambda;
-    ptr_LAFS_with_depth[9 * i + 0] = dlambda_dx[0];
-    ptr_LAFS_with_depth[9 * i + 0] = dlambda_dx[1];
+    ptr_LAFS_with_depth[9 * i + 1] = f_l.y;
+    ptr_LAFS_with_depth[9 * i + 2] = f_l.a11;
+    ptr_LAFS_with_depth[9 * i + 3] = f_l.a12;
+    ptr_LAFS_with_depth[9 * i + 4] = f_l.a21;
+    ptr_LAFS_with_depth[9 * i + 5] = f_l.a22;
+    ptr_LAFS_with_depth[9 * i + 6] = lambda;
+    ptr_LAFS_with_depth[9 * i + 7] = dlambda_dx[0];
+    ptr_LAFS_with_depth[9 * i + 8] = dlambda_dx[1];
   }
 
   return LAFS_with_depth;
@@ -347,7 +352,7 @@ PYBIND11_PLUGIN(pyoneacpose) {
     py::arg("first_octave") = -1,
     py::arg("num_octaves") = 4,
     py::arg("octave_resolution") = 3,
-    py::arg("domain_size_pooling") = true
+    py::arg("domain_size_pooling") = false
   );
 
   m.def("match_LAFs", &match_LAFs, R"doc(some doc)doc",

@@ -36,17 +36,14 @@ $ pip install ./one-ac-pose
 Usage
 -----
 
-For lauching the full pipeline of 
- - predict depth for input RGB views using [MegaDepth](https://github.com/zhengqili/MegaDepth)
- - extract affine features using [VlFeat](https://github.com/eivan/VlFeatExtraction)
- - perform two-view matching of extracted features
- - real-world two-view pose estimation,
-```shell
-$ python3 scripts/estimate_pose.py path/to/image1 path/to/image2
-```
+For python:
 
-But, if you already have your depth images along with the RGB views and you only want to run real-world two-view pose estimation:
-```shell
-$ TODO
-```
-example: TODO
+- Install Python bindings (see above)
+- Open Jupyter Notebook from the root of the cloned repository
+- Launch either of the example scripts
+
+Example Jupyter Notebooks:
+--------------------------
+
+- [Piccadilly scene](example_piccadilly.ipynb) from the 1DSfM dataset
+- [Fountain scene](example_fountain.ipynb) from the Strecha dataset

@@ -241,8 +241,7 @@ py::tuple match_LAFs(
 
 double sample_bilinear(const float* img, size_t rows, size_t cols, float x, float y)
 {
-  assert(!img.empty());
-  assert(img.channels() == 3);
+  assert(img);
 
   const int x_i = (int)x;
   const int y_i = (int)y;

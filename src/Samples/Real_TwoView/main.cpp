@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <iterator>
 
 #include <common/pose_estimation.hpp>
 #include <common/features.hpp>

@@ -97,12 +97,14 @@ void compute_synthetic_LAF(
   const Mat32 dY_dx = P.topLeftCorner<3, 3>() * dX_dx;
 
   Mat23 dx_dY;
-  std::tie(laf.x.noalias(), dx_dY.noalias()) = cam->p_gradient(Y);
+  //std::tie(laf.x.noalias(), dx_dY.noalias()) = cam->p_gradient(Y); // g++8 error, msvc works
+  std::tie(laf.x, dx_dY) = cam->p_gradient(Y);
   // affine shape around x, aka dx0_dx
   laf.M.noalias() = dx_dY * dY_dx;
 
   RowVec3 dlambda_dY;
-  std::tie(laf.lambda, dlambda_dY.noalias()) = cam->depth_gradient(Y);
+  //std::tie(laf.lambda, dlambda_dY.noalias()) = cam->depth_gradient(Y); // g++8 error, msvc works
+  std::tie(laf.lambda, dlambda_dY) = cam->depth_gradient(Y);
   // aka dlambda_dx
   laf.dlambda_dx.noalias() = dlambda_dY * dY_dx;
 }

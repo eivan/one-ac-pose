@@ -11,6 +11,7 @@ add_library(common
 )
 
 target_link_libraries(common
+  OneACPose
   Eigen3::Eigen
   GraphCutRANSAC
   ${OpenCV_LIBS}

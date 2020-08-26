@@ -82,7 +82,7 @@ namespace common
 		explicit Dual_Number(const V& f) { f_ = T(f); grad_.setZero(); }
 
 		// FALLBACK OPERATORS
-		explicit Dual_Number(const Dual_Number<float, N>& f) { f_ = T(f.f()); grad_ = f.grad().cast<T>(); }
+		explicit Dual_Number(const Dual_Number<float, N>& f) { f_ = T(f.f()); grad_ = f.grad().template cast<T>(); }
 		explicit operator double() const { return double(f_); }
 		explicit operator int() const { return int(f_); }
 		template <typename V>
@@ -455,7 +455,7 @@ namespace common
 			(void)fx;
 			(void)dx;
 		}*/
-		static Dual_Number<T, N> ChainRule(const Dual_Number<T, N>& fx, const Dual_Number<T, N>& x)
+		static Dual_Number<T, N> ChainRule(const Dual_Number<T, N>& fx, const Dual_Number<T, N>& dx)
 		{
 			return{
 				fx.f(),
@@ -946,7 +946,7 @@ namespace common
 		Eigen::Matrix<common::Dual_Number<T, N>, N, 1> dn_param; \
 		for (int i = 0; i < N; ++i) \
 			dn_param[i].setPartial(param[i], i); \
-		Eigen::Matrix<common::Dual_Number<T, N>, M, 1> f_ = ##FUN(dn_param);  \
+		Eigen::Matrix<common::Dual_Number<T, N>, M, 1> f_ = FUN(dn_param);  \
 		Eigen::Matrix<T, M, N> grad; \
 		Eigen::Matrix<T, M, 1> val; \
 		for (int i = 0; i < M; ++i) { \
@@ -963,7 +963,7 @@ namespace common
 		Eigen::Matrix<common::Dual_Number<T, N>, N, 1> dn_param; \
 		for (int i = 0; i < N; ++i) \
 			dn_param[i].setPartial(param[i], i); \
-		common::Dual_Number<T, N> f_ = ##FUN(dn_param); \
+		common::Dual_Number<T, N> f_ = FUN(dn_param); \
 		return { f_.f(), f_.grad() }; \
 	}
 

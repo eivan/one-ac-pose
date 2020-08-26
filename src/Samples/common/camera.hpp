@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <OneACPose/types.hpp>
 #include "dual_number.hpp"
 

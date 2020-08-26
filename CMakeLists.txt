@@ -28,3 +28,13 @@ add_subdirectory(third_party)
 # Libraries & Executables
 # ==============================================================================
 add_subdirectory(src)
+
+# quick fix of linking error after compilong using gcc / ubuntu (TODO)
+set_property(
+  TARGET 
+    common
+    OneACPose
+    VlFeatExtraction
+    vlfeat
+  PROPERTY
+    POSITION_INDEPENDENT_CODE ON)

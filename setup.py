@@ -50,7 +50,7 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                 cfg.upper(),
                 extdir)]
-            cmake_args += ['-DOpenCV_DIR=C:/Libraries/CPP/opencv-master/build']
+            #cmake_args += ['-DOpenCV_DIR=C:/Libraries/CPP/opencv-master/build']
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']

@@ -9,6 +9,7 @@
 #include <graph-cut-ransac/src/pygcransac/include/essential_estimator.h>
 #include <graph-cut-ransac/src/pygcransac/include/fundamental_estimator.h>
 #include <graph-cut-ransac/src/pygcransac/include/progressive_napsac_sampler.h>
+#include <graph-cut-ransac/src/pygcransac/include/preemption_sprt.h>
 
 #include <common/camera_radial.hpp>
 
@@ -128,6 +129,11 @@ bool estimatePose_1ACD_GCRANSAC(
   // Apply Graph-cut RANSAC
   OneACD_EssentialMatrixEstimator estimator(intrinsics_src, intrinsics_dst);
 
+  // Initializing SPRT test
+  preemption::SPRTPreemptiveVerfication<OneACD_EssentialMatrixEstimator> preemptive_verification(
+    points,
+    estimator);
+
   EssentialMatrix model;
 
   // Initialize the samplers
@@ -142,13 +148,16 @@ bool estimatePose_1ACD_GCRANSAC(
     return false;
   }
 
-  GCRANSAC<OneACD_EssentialMatrixEstimator, neighborhood::GridNeighborhoodGraph> gcransac;
+  GCRANSAC<OneACD_EssentialMatrixEstimator, 
+          neighborhood::GridNeighborhoodGraph, 
+          MSACScoringFunction<OneACD_EssentialMatrixEstimator>,
+          preemption::SPRTPreemptiveVerfication<OneACD_EssentialMatrixEstimator>> gcransac;
   gcransac.setFPS(fps_); // Set the desired FPS (-1 means no limit)
   gcransac.settings.threshold = normalized_threshold; // The inlier-outlier threshold
   gcransac.settings.spatial_coherence_weight = spatial_coherence_weight_; // The weight of the spatial coherence term
   gcransac.settings.confidence = confidence_; // The required confidence in the results
   gcransac.settings.max_local_optimization_number = 50; // The maximum number of local optimizations
-  gcransac.settings.max_iteration_number = 5000; // The maximum number of iterations
+  //gcransac.settings.max_iteration_number = 5000; // The maximum number of iterations
   gcransac.settings.min_iteration_number = 50; // The minimum number of iterations
   gcransac.settings.neighborhood_sphere_radius = cell_number_in_neighborhood_graph_; // The radius of the neighborhood ball
   gcransac.settings.core_number = std::thread::hardware_concurrency(); // The number of parallel processes
@@ -163,7 +172,8 @@ bool estimatePose_1ACD_GCRANSAC(
     &main_sampler,
     &local_optimization_sampler,
     &neighborhood,
-    model);
+    model,
+    preemptive_verification);
 
   // Get the statistics of the results
   const utils::RANSACStatistics& statistics = gcransac.getRansacStatistics();

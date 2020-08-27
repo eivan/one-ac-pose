@@ -59,7 +59,12 @@ namespace gcransac
         // the function 'estimateModel' is applied.
         static constexpr bool returnMultipleModels()
         {
-          return false;
+          return maximumSolutions() > 1;
+        }
+
+        static constexpr size_t maximumSolutions()
+        {
+          return 1;
         }
 
         // Estimate the model parameters from the given point sample

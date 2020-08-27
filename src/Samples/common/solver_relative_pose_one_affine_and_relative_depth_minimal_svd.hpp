@@ -6,7 +6,7 @@
 #include <Eigen/Geometry>
 #include <complex>
 
-#include "cv.h"
+#include <opencv2/core.hpp>
 //#include "pose.h"
 //#include "pose_utils.h"
 //#include "solver_engine.h"

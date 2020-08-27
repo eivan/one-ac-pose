@@ -59,7 +59,7 @@ namespace common {
       std::vector<size_t>* im_shape) {
 
         // Read Image
-        cv::Mat im = cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+        cv::Mat im = cv::imread(filename, 0);
 
         if (im.empty()) {
           std::cerr << "Failed to read image " << filename << std::endl;

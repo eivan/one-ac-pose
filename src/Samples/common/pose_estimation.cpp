@@ -10,6 +10,7 @@
 #include <graph-cut-ransac/src/pygcransac/include/fundamental_estimator.h>
 #include <graph-cut-ransac/src/pygcransac/include/progressive_napsac_sampler.h>
 #include <graph-cut-ransac/src/pygcransac/include/preemption_sprt.h>
+#include <graph-cut-ransac/src/pygcransac/include/single_point_sampler.h>
 
 #include <common/camera_radial.hpp>
 
@@ -135,9 +136,10 @@ bool estimatePose_1ACD_GCRANSAC(
     estimator);
 
   EssentialMatrix model;
-
+  
   // Initialize the samplers
-  sampler::UniformSampler main_sampler(&points);
+  sampler::SinglePointSampler main_sampler(&points);
+  //sampler::UniformSampler main_sampler(&points);
   sampler::UniformSampler local_optimization_sampler(&points); // The local optimization sampler is used inside the local optimization
 
                                                                // Checking if the samplers are initialized successfully.

@@ -33,6 +33,14 @@ $ git clone --recursive https://github.com/eivan/one-ac-pose.git
 $ pip install ./one-ac-pose
 ```
 
+To use the package, launch python and import "pyoneacpose"
+```shell
+$ python
+```
+```python
+>>> import pyoneacpose
+```
+
 Usage
 -----
 

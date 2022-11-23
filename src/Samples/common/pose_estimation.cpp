@@ -64,32 +64,34 @@ bool estimatePose_1ACD_GCRANSAC(
   cam_source->set_params({ intrinsics_src(0,0), intrinsics_src(1,1), intrinsics_src(0,2), intrinsics_src(1,2), 0.0, 0.0, 0.0 });
   cam_destination->set_params({ intrinsics_dst(0,0), intrinsics_dst(1,1), intrinsics_dst(0,2), intrinsics_dst(1,2), 0.0, 0.0, 0.0 });
 
+  const size_t N = LAFs_right.size();
+
   // Normalize the point coordinate by the intrinsic matrices
-  const int stride = 2 * 2 + 2 * 6;
-  cv::Mat points(LAFs_right.size(), 4, CV_64F);
-  cv::Mat normalized_points(LAFs_right.size(), stride, CV_64F);
+  cv::Mat points(N, 2 * OneACPose::Vec2::SizeAtCompileTime, CV_64F);
+  cv::Mat normalized_points(N, 2 * (OneACPose::Vec3::SizeAtCompileTime + OneACPose::Mat32::SizeAtCompileTime), CV_64F);
 
-  double* point_ptr = reinterpret_cast<double*>(normalized_points.data);
+  auto* point_ptr = reinterpret_cast<OneACPose::Vec2*>(points.data);
+  auto* normalized_point_ptr = reinterpret_cast<double*>(normalized_points.data);
 
-  for (int i = 0; i < LAFs_right.size(); ++i) {
+  for (int i = 0; i < N; ++i) {
 
     // points:
-    points.at<double>(i, 0) = LAFs_left[i].x.x();
-    points.at<double>(i, 1) = LAFs_left[i].x.y();
-    points.at<double>(i, 2) = LAFs_right[i].x.x();
-    points.at<double>(i, 3) = LAFs_right[i].x.y();
+    *point_ptr = LAFs_left[i].x;
+    ++point_ptr;
+    *point_ptr = LAFs_right[i].x;
+    ++point_ptr;
 
     // normalized:
     OneACPose::Vec3 src, dst;
     OneACPose::Mat32 src_diff, dst_diff;
     LAFs_left[i].as_3D(cam_source, src, src_diff);
     LAFs_right[i].as_3D(cam_destination, dst, dst_diff);
-    Eigen::Map<OneACPose::Vec2>(point_ptr + 0).noalias() = src.head<2>();
-    Eigen::Map<OneACPose::Vec2>(point_ptr + 2).noalias() = dst.head<2>();
-    Eigen::Map<OneACPose::Mat32>(point_ptr + 4 + 0).noalias() = src_diff;
-    Eigen::Map<OneACPose::Mat32>(point_ptr + 4 + 6).noalias() = dst_diff;
 
-    point_ptr += stride;
+    using namespace OneACPose;
+    MVec3d(normalized_point_ptr).noalias() = src; normalized_point_ptr += MVec3d::SizeAtCompileTime;
+    MVec3d(normalized_point_ptr).noalias() = dst; normalized_point_ptr += MVec3d::SizeAtCompileTime;
+    MMat32d(normalized_point_ptr).noalias() = src_diff; normalized_point_ptr += MMat32d::SizeAtCompileTime;
+    MMat32d(normalized_point_ptr).noalias() = dst_diff; normalized_point_ptr += MMat32d::SizeAtCompileTime;
   }
 
   // Normalize the threshold by the average of the focal lengths

@@ -134,14 +134,11 @@ namespace gcransac
         {
           const double* point_ptr = data_ptr + good_point_indices[0];
 
-          using MMat32d = Eigen::Map<const OneACPose::Mat32>;
-          using MVec2d = Eigen::Map<const OneACPose::Vec2>;
-
-          src.noalias() = MVec2d(point_ptr + 0).homogeneous();
-          dst.noalias() = MVec2d(point_ptr + 2).homogeneous();
-
-          src_diff.noalias() = MMat32d(point_ptr + 4 + 0);
-          dst_diff.noalias() = MMat32d(point_ptr + 4 + 6);
+          using namespace OneACPose;
+          src = MVec3dc(point_ptr); point_ptr += MVec3dc::SizeAtCompileTime;
+          dst = MVec3dc(point_ptr); point_ptr += MVec3dc::SizeAtCompileTime;
+          src_diff = MMat32dc(point_ptr); point_ptr += MMat32dc::SizeAtCompileTime;
+          dst_diff = MMat32dc(point_ptr); point_ptr += MMat32dc::SizeAtCompileTime;
         }
 
         // Step 3. Compute rotation, scaling and translation

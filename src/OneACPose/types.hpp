@@ -15,5 +15,11 @@ namespace OneACPose {
 
   using RowVec2 = Eigen::Matrix<double, 1, 2, Eigen::RowMajor>;
   using RowVec3 = Eigen::Matrix<double, 1, 3, Eigen::RowMajor>;
+
+  using MMat32d = Eigen::Map<OneACPose::Mat32>;
+  using MVec3d = Eigen::Map<OneACPose::Vec3>;
+
+  using MMat32dc = Eigen::Map<const OneACPose::Mat32>;
+  using MVec3dc = Eigen::Map<const OneACPose::Vec3>;
   
 }

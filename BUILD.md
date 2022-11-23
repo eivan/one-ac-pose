@@ -12,6 +12,7 @@ Required tools:
 Dependencies:
 
 - OpenCV (tested with v4.3.0)
+- Eigen3
 
 Optional dependencies:
 
